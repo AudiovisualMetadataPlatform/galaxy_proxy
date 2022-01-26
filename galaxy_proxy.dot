@@ -1,0 +1,46 @@
+digraph {
+    graph [
+        rankdir="TB",
+    ];
+    node [
+        shape="rect",
+    ];
+
+    start [label="User requests\nedit workflow URL", color="blue"];        
+    galaxy_login [label="Log in as galaxy user"];
+    session_generated [label="Session Generated", color="red"];
+    store_session [label="Store Session Data"]
+    wf_details [label="Gather workflowID, etc"];
+    set_wf_main_page [label="URL set to WF Editor main page"];
+    url_validator [label="Validate URL, Access control, etc"];
+    inject_session [label="Galaxy session cookie injected"];
+    filter_session [label="Galaxy session cookie removed"];
+    request_galaxy_url [label="Request URL from galaxy backend"];
+    galaxy_request_handler [label="Galaxy generates response", color="red"];
+    send_response [label="Send response to client"];
+    client_display [label="Client Displays result", color="blue"];
+    client_wf_request [label="Client makes workflow request", color="blue"];
+    access_denied [label="Access denied", color="blue"];
+    destroy_session [label="Call galaxy to destroy session"];
+    session_destroyed [label="Session destroyed", color="red"];
+    send_redirect_to_AMP [label="Redirect to AMP"];
+    client_goes_to_amp [label="Client returns to AMP", color="blue"];
+
+    start -> wf_details;
+    wf_details -> galaxy_login;
+    galaxy_login -> session_generated;
+    session_generated -> store_session;
+    store_session -> set_wf_main_page;
+    set_wf_main_page -> url_validator; 
+    url_validator -> inject_session [label="URL is allowed"];
+    url_validator -> access_denied [label="URL or parameters\nnot allowed"];
+    inject_session -> request_galaxy_url;
+    request_galaxy_url -> galaxy_request_handler -> filter_session -> send_response;
+    send_response -> client_display;
+    client_display -> client_wf_request;
+    client_wf_request -> url_validator;
+    url_validator -> destroy_session [label="End of\nWF edit"];
+    destroy_session -> session_destroyed;
+    session_destroyed -> send_redirect_to_AMP;
+    send_redirect_to_AMP -> client_goes_to_amp;   
+}
